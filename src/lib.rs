@@ -22,7 +22,9 @@ pub const PLUGIN_NAME: &str = "videostore";
 /// The store's stylesheet, sent as a `<style>` row at the top of each list.
 const STORE_CSS: &str = include_str!("store.css");
 
-const VIDEO_EXTENSIONS: &[&str] = &["mp4", "m4v", "webm", "mkv", "mov", "avi", "mpg", "mpeg", "ogv"];
+const VIDEO_EXTENSIONS: &[&str] = &[
+    "mp4", "m4v", "webm", "mkv", "mov", "avi", "mpg", "mpeg", "ogv",
+];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Sort {
@@ -88,7 +90,11 @@ pub fn read_folder(dir: &Path, sort: Sort) -> std::io::Result<Listing> {
             });
         }
     }
-    let by_name = |a: &str, b: &str| a.to_lowercase().cmp(&b.to_lowercase()).then_with(|| a.cmp(b));
+    let by_name = |a: &str, b: &str| {
+        a.to_lowercase()
+            .cmp(&b.to_lowercase())
+            .then_with(|| a.cmp(b))
+    };
     match sort {
         Sort::Name => {
             folders.sort_by(|a, b| by_name(&a.0, &b.0));
@@ -97,7 +103,11 @@ pub fn read_folder(dir: &Path, sort: Sort) -> std::io::Result<Listing> {
         // Newest first, what you just added.
         Sort::Date => {
             folders.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| by_name(&a.0, &b.0)));
-            items.sort_by(|a, b| b.modified.cmp(&a.modified).then_with(|| by_name(&a.name, &b.name)));
+            items.sort_by(|a, b| {
+                b.modified
+                    .cmp(&a.modified)
+                    .then_with(|| by_name(&a.name, &b.name))
+            });
         }
     }
     Ok(Listing {
@@ -146,7 +156,7 @@ impl Texts {
 pub fn rows(listing: &Listing, texts: &Texts) -> Vec<FfonElement> {
     let mut out = vec![FfonElement::Str(format!("<style>{STORE_CSS}</style>"))];
     for folder in &listing.folders {
-        out.push(FfonElement::new_obj(&tags::escape(folder)));
+        out.push(FfonElement::new_obj(tags::escape(folder)));
     }
     if !listing.items.is_empty() {
         out.push(FfonElement::Str(grid_row(&listing.items)));
@@ -159,7 +169,11 @@ pub fn rows(listing: &Listing, texts: &Texts) -> Vec<FfonElement> {
 /// The folder a setting names: as written when absolute, under the home folder otherwise.
 pub fn resolve_folder(setting: &str, home: Option<&Path>) -> PathBuf {
     let setting = setting.trim();
-    let setting = if setting.is_empty() { "Videos" } else { setting };
+    let setting = if setting.is_empty() {
+        "Videos"
+    } else {
+        setting
+    };
     let under_home = |rest: &str| match home {
         Some(home) => home.join(rest),
         None => PathBuf::from(rest),
@@ -228,7 +242,11 @@ impl Store {
     }
 
     pub fn set_current_path(&mut self, path: &str) {
-        self.current = if path.is_empty() { "/".to_owned() } else { path.to_owned() };
+        self.current = if path.is_empty() {
+            "/".to_owned()
+        } else {
+            path.to_owned()
+        };
         self.invalidate();
     }
 
@@ -408,7 +426,8 @@ mod tests {
 
     impl Temp {
         fn new(name: &str) -> Temp {
-            let dir = std::env::temp_dir().join(format!("videostore-{}-{name}", std::process::id()));
+            let dir =
+                std::env::temp_dir().join(format!("videostore-{}-{name}", std::process::id()));
             let _ = std::fs::remove_dir_all(&dir);
             std::fs::create_dir_all(&dir).unwrap();
             Temp(dir)
@@ -484,7 +503,10 @@ mod tests {
     #[test]
     fn a_folder_is_subfolders_then_one_row_of_its_videos() {
         let t = Temp::new("tree");
-        t.file("b.mp4").file("a.webm").file("photo.jpg").file(".hidden.mp4");
+        t.file("b.mp4")
+            .file("a.webm")
+            .file("photo.jpg")
+            .file(".hidden.mp4");
         t.folder("Series").folder("anime").folder(".cache");
         let rows = loaded(&mut store(&t.0));
         let got = strs(&rows);
@@ -496,7 +518,10 @@ mod tests {
         let counts = markup::target_counts(&got[3]);
         assert_eq!((counts.videos, counts.total()), (2, 2), "{}", got[3]);
         let targets = markup::targets(&got[3]);
-        let order: Vec<&str> = targets.iter().map(|t| t.value.rsplit('/').next().unwrap()).collect();
+        let order: Vec<&str> = targets
+            .iter()
+            .map(|t| t.value.rsplit('/').next().unwrap())
+            .collect();
         assert_eq!(order, ["a.webm", "b.mp4"]);
     }
 
@@ -514,7 +539,11 @@ mod tests {
         let t = Temp::new("shape");
         t.file("a.mp4");
         let got = strs(&loaded(&mut store(&t.0)));
-        assert!(got[1].starts_with(r#"<div class="grid-container"><div class="grid-item"><video "#), "{}", got[1]);
+        assert!(
+            got[1].starts_with(r#"<div class="grid-container"><div class="grid-item"><video "#),
+            "{}",
+            got[1]
+        );
         assert!(STORE_CSS.contains(".grid-container") && STORE_CSS.contains("repeat(3, 1fr)"));
         assert!(STORE_CSS.contains("max-width: none") && STORE_CSS.contains("16 / 9"));
     }
@@ -523,7 +552,9 @@ mod tests {
     #[test]
     fn a_file_name_with_tags_in_it_stays_a_file_name() {
         let t = Temp::new("names");
-        t.file("<b>x.mp4").file(r#"say "hi" & go.webm"#).file("<img src=y>.mkv");
+        t.file("<b>x.mp4")
+            .file(r#"say "hi" & go.webm"#)
+            .file("<img src=y>.mkv");
         let row = the_grid(&loaded(&mut store(&t.0)));
         let targets = markup::targets(&row);
         assert_eq!(targets.len(), 3, "{row}");
@@ -531,11 +562,22 @@ mod tests {
             .iter()
             .map(|t| t.value.rsplit('/').next().unwrap().to_owned())
             .collect();
-        assert_eq!(names, ["<b>x.mp4", "<img src=y>.mkv", r#"say "hi" & go.webm"#]);
+        assert_eq!(
+            names,
+            ["<b>x.mp4", "<img src=y>.mkv", r#"say "hi" & go.webm"#]
+        );
         for target in &targets {
-            assert!(Path::new(&target.value).is_file(), "{} is not the real path", target.value);
+            assert!(
+                Path::new(&target.value).is_file(),
+                "{} is not the real path",
+                target.value
+            );
         }
-        assert!(markup::plain(&row).contains("<b>x.mp4"), "{}", markup::plain(&row));
+        assert!(
+            markup::plain(&row).contains("<b>x.mp4"),
+            "{}",
+            markup::plain(&row)
+        );
     }
 
     #[test]
@@ -593,7 +635,10 @@ mod tests {
         store.fetch();
         store.push_path("sub");
         let row = the_grid(&loaded(&mut store));
-        assert!(row.contains("inner.mp4") && !row.contains("top.mp4"), "{row}");
+        assert!(
+            row.contains("inner.mp4") && !row.contains("top.mp4"),
+            "{row}"
+        );
     }
 
     #[test]
@@ -620,10 +665,19 @@ mod tests {
     fn sorting_by_date_is_newest_first() {
         let t = Temp::new("dates");
         t.file("z-new.mp4").file("a-old.mp4");
-        let old = std::fs::File::options().write(true).open(t.0.join("a-old.mp4")).unwrap();
-        old.set_modified(SystemTime::now() - Duration::from_secs(86_400)).unwrap();
+        let old = std::fs::File::options()
+            .write(true)
+            .open(t.0.join("a-old.mp4"))
+            .unwrap();
+        old.set_modified(SystemTime::now() - Duration::from_secs(86_400))
+            .unwrap();
         let names = |sort| -> Vec<String> {
-            read_folder(&t.0, sort).unwrap().items.into_iter().map(|i| i.name).collect()
+            read_folder(&t.0, sort)
+                .unwrap()
+                .items
+                .into_iter()
+                .map(|i| i.name)
+                .collect()
         };
         assert_eq!(names(Sort::Date), ["z-new.mp4", "a-old.mp4"]);
         assert_eq!(names(Sort::Name), ["a-old.mp4", "z-new.mp4"]);
@@ -635,10 +689,16 @@ mod tests {
     fn the_setting_means_a_folder_under_home_unless_it_says_otherwise() {
         let home = Path::new("/home/someone");
         assert_eq!(resolve_folder("Videos", Some(home)), home.join("Videos"));
-        assert_eq!(resolve_folder("~/Films/2026", Some(home)), home.join("Films/2026"));
+        assert_eq!(
+            resolve_folder("~/Films/2026", Some(home)),
+            home.join("Films/2026")
+        );
         assert_eq!(resolve_folder("  ", Some(home)), home.join("Videos"));
         #[cfg(unix)]
-        assert_eq!(resolve_folder("/mnt/films", Some(home)), PathBuf::from("/mnt/films"));
+        assert_eq!(
+            resolve_folder("/mnt/films", Some(home)),
+            PathBuf::from("/mnt/films")
+        );
     }
 
     #[test]
@@ -671,11 +731,17 @@ mod tests {
             "videostore-radio-sort-order",
         ] {
             for (language, text) in languages {
-                assert!(text.contains(&format!("\n{id} = ")), "{language} has no {id}");
+                assert!(
+                    text.contains(&format!("\n{id} = ")),
+                    "{language} has no {id}"
+                );
             }
         }
         for (language, text) in languages {
-            assert!(text.contains("%s"), "{language} must keep the folder placeholder");
+            assert!(
+                text.contains("%s"),
+                "{language} must keep the folder placeholder"
+            );
         }
     }
 
