@@ -1,7 +1,7 @@
 //! The video store: a folder of videos as a grid.
 //!
 //! It only reads. Subfolders are rows you enter with Right, and each folder's videos are
-//! one row, a grid the app's navigate mode moves around. The app shows each video's first
+//! one row, a grid the app's in element mode moves around. The app shows each video's first
 //! picture, and plays it in the window. Keys, the big
 //! view and playing a video are all the app's: this plugin only says what is there.
 //!
