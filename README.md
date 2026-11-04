@@ -8,7 +8,7 @@ keyboard-first, accessibility-first way to use your entire computer.
 It shows a folder of videos as a grid of three columns, each with its first picture and its
 file name. Subfolders are rows you enter with Right. Moving onto the grid, your screen reader
 says how many videos it holds. Press i to go to the first one and a to go to the last, move
-with the arrows, and press Enter or d to play one. Space pauses, Escape goes back. Nothing
+with the arrows, and press Enter or d to play one. Enter again pauses, Escape goes back. Nothing
 opens in another program.
 
 It only reads. It never changes, moves or deletes a file. It lists MP4, M4V, WebM, MKV, MOV,

@@ -7,4 +7,4 @@ videostore-loading = De map wordt gelezen
 videostore-empty = Geen video's in deze map
 videostore-unreadable = Kan %s niet lezen. Je kunt een andere map kiezen in de instellingen
 
-videostore-tutorial = Videotheek, uit de Store: je video's als een raster. Druk op i op het raster, beweeg met de pijltjes, en druk op Enter om er een af te spelen. Spatie pauzeert en Escape gaat terug.
+videostore-tutorial = Videotheek, uit de Store: je video's als een raster. Druk op i op het raster, beweeg met de pijltjes, en druk op Enter om er een af te spelen. Nogmaals Enter pauzeert en Escape gaat terug.

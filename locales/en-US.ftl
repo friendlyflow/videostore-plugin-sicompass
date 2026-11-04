@@ -9,4 +9,4 @@ videostore-unreadable = Cannot read %s. You can choose another folder in the set
 
 # The tutorial's paragraphs about this program, under its programs section:
 # <name>-tutorial, then <name>-tutorial-2 and so on, read until one is missing.
-videostore-tutorial = Video store, from the Store: your videos as a grid. Press i on the grid, move with the arrows, and press Enter to play one. Space pauses and Escape goes back.
+videostore-tutorial = Video store, from the Store: your videos as a grid. Press i on the grid, move with the arrows, and press Enter to play one. Enter again pauses and Escape goes back.
